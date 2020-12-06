@@ -1,0 +1,195 @@
+<!--
+ * @Author: msc
+ * @Date: 2020-12-06 00:18:02
+ * @LastEditTime: 2020-12-06 13:44:24
+ * @LastEditors: msc
+ * @Description: 
+ * @city: BeiJin
+ * @FilePath: \三阶段d:\phpStudy\WWW\w3\week7_day05xiawu\shop3\pages\cart.html
+ * @可以输入预定的版权声明、个性签名、空行等
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+  * {
+      margin: 0;
+      padding: 0;
+  }
+
+  ul li {
+      list-style: none;
+      width: 700px;
+      margin: 0 auto;
+      height: 300px;
+     
+      
+
+  }
+
+  #app {
+      text-align: center;
+      width: 800px;     
+      background-color: silver;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+  }
+  
+  main{
+    float: left;
+    height: 100%;
+    width: 100%;
+  }
+  .zin{
+    vertical-align: middle;
+    float: left;
+  
+  }
+  p{
+    width: 200px;
+    height: 200px;
+    float: left;
+  }
+  h6{
+    float: left;
+    width: 200px;
+    height: 80px;
+  }
+  footer{
+    float: right;
+    
+    width: 200px;
+    height: 100px;
+  }
+ 
+</style>
+
+<body>
+    <div id="app">
+      <input type="checkbox" v-model="qcheck" @change="all">全选/全不选
+      <button @click="fxuan">反选</button>
+      <ul>
+        <li v-for="(item,index) in cartArr" :key="item.goods_id">
+          <main>
+            <input class="zin" type="checkbox" :value="item.goods_id" v-model="checks" @change="zxuan">
+            <p> <img :src="item.goods_small_logo"></p>
+            <h2>分类：<a href="">{{item.cat_one_id}}</a> <a href="">{{item.cat_two_id}}</a>  <a href="">{{item.cat_three_id}}</a> </h2>
+            <h6>{{item.goods_name}}</h6>
+            <footer>
+              总价：{{item.goods_price*item.num}}
+              <button @click="idd(item,index)">-</button>
+              {{item.num}}
+              <button @click="add(item)">+</button>
+
+            </footer>
+            
+
+             
+          
+            
+           
+          </main>
+          
+        </li>
+      </ul>
+
+      
+    </div>
+
+</body>
+
+
+</html>
+<script src="../js/vue.js"></script>
+<script>
+  //从localStorage中拿的数据
+  let cartArr = JSON.parse( window.localStorage.getItem('cart') );
+ 
+  new Vue({
+    el:"#app",
+    data:{
+      cartArr,
+      qcheck:false,
+      checks:[],
+
+
+      
+    },
+    methods:{
+      idd:function(item,index){
+        //删除操作中有个BUG：当我们把数据删了的时候，他在checks中并没有删除，我们要在这里补一刀删除此条数据，此条数据在这里给我们了item.goods_id
+        //只需要indexOf返回他在checks中的索引下标。然后进行删除
+        if(item.num<=1){
+          if(confirm("确实")){
+            this.cartArr.splice(index,1)
+            window.localStorage.setItem( 'cart',JSON.stringify( cartArr ) );
+            let key =this.checks.indexOf(item.goods_id)
+            if(key>-1){
+              this.checks.splice(key,1)
+            }
+          }
+        }else{
+          item.num--;
+          window.localStorage.setItem( 'cart',JSON.stringify( cartArr ) );
+        }
+
+      },
+
+
+      add:function(item){
+        item.num++;
+        window.localStorage.setItem('cart',JSON.stringify(cartArr))
+      },
+      all:function(){
+        //全选分为两种情况，一种是自身为true将所有的数据写入到checks中，
+        //一种为false将所有的数据为空
+        this.checks=[];
+        if(this.qcheck){
+          this.cartArr.forEach((v,k)=>{
+            console.log(v.goods_id)
+            this.checks.push(v.goods_id)
+
+          })
+        }
+      },
+
+      //正选出现的问题，当正选选中，子选项取消，正选依旧存在
+      zxuan:function(){
+        if(this.checks.length===this.cartArr.length){
+          //则全选为ture
+          this.qcheck=true;
+        }else{
+          this.qcheck=false;
+        }
+      },
+      //反选，点击反选原来在checks数组中的拿出去，原来不在的写入，那么循环遍历cartArr把里面所有的goods_id全部拿出来，一个个比对checks中是否存在
+      //创建一个新的空数组，存在的不写入不存在写入
+      fxuan:function(){
+        let arr=[];
+        this.cartArr.forEach((v,k)=>{
+          if(this.checks.indexOf(v.goods_id)===-1){
+            arr.push(v.goods_id)
+          }
+          
+        })
+        this.checks=arr;
+      }
+
+    },
+
+
+  })
+</script>
+
+
+    
